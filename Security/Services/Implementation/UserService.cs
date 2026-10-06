@@ -7,14 +7,16 @@ namespace Security.Services.Implementation;
 
 public class UserService(IUserRepository userRepo, IPasswordHasher passwordHasher) : IUserService
 {
-    public bool TryLogin(TryLogin user)
+    public User? TryLogin(TryLogin user)
     {
         var dbUser = userRepo.GetUserByUsername(user.Username);
         if(dbUser == null)
         {
-            return false;
+            return null;
         }
-        return passwordHasher.VerifyPassword(user.Password, dbUser.PasswordHash);
+        return passwordHasher.VerifyPassword(user.Password, dbUser.PasswordHash)
+            ? dbUser
+            : null;
     }
 
     public void TryRegister(CreateUserRequest user)
@@ -23,7 +25,13 @@ public class UserService(IUserRepository userRepo, IPasswordHasher passwordHashe
         userRepo.CreateUser(new User
         {
             Username = user.Username,
-            PasswordHash = passwordHash
+            PasswordHash = passwordHash,
+            Role = user.Role
         });
+    }
+
+    public List<User> GetUsers()
+    {
+        return userRepo.GetAll();
     }
 }

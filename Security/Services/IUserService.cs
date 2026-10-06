@@ -5,7 +5,8 @@ namespace Security.Services;
 
 public interface IUserService
 {
-    bool TryLogin(TryLogin user);
+    User? TryLogin(TryLogin user);
     
     void TryRegister(CreateUserRequest user);
+    List<User>  GetUsers();
 }

@@ -1,7 +1,12 @@
+using System.Text;
 using DataAccess;
 using DataAccess.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Security;
 using Security.Services;
+using Security.Services.Authorization;
 using Security.Services.Implementation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,14 +17,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddScoped<IUserService, UserService>();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.ConfigureInfrastructureServices();
-builder.Services.ConfigureDomainServices();
+builder.Services.ConfigureDomainServices(builder.Configuration["JwtSecret"]!);
 builder.Services.AddControllers();
+
+
 
 builder.Services.AddCors(s => s
     .AddPolicy("CorsPolicy", t => t.AllowAnyHeader()
@@ -27,8 +32,27 @@ builder.Services.AddCors(s => s
         .AllowAnyOrigin()));
 
 
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Indsæt tokenet fra /login."
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("bearer", document)] = []
+    });
+});
+
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

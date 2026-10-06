@@ -3,11 +3,7 @@ using DataAccess;
 using DataAccess.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using Security;
-using Security.Services;
-using Security.Services.Authorization;
-using Security.Services.Implementation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,24 +26,6 @@ builder.Services.AddCors(s => s
     .AddPolicy("CorsPolicy", t => t.AllowAnyHeader()
         .AllowAnyMethod()
         .AllowAnyOrigin()));
-
-
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
-    {
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        Description = "Indsæt tokenet fra /login."
-    });
-
-    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-    {
-        [new OpenApiSecuritySchemeReference("bearer", document)] = []
-    });
-});
-
 
 var app = builder.Build();
 

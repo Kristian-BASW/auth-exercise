@@ -17,4 +17,8 @@
       <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="README.md" />
+    </ItemGroup>
+
 </Project>
